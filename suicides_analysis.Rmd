@@ -1,0 +1,48 @@
+---
+title: "kaggle suicide dataset analysis"
+output: html_document
+---
+1) Importar dataset
+
+```{r cars}
+library(readr)
+master_suic <- read_csv("master.csv")
+View(master)
+```
+
+La data presentada tiene 27820 observaciones en 12 columnas.
+
+El significado de cada columna:
+  country = país de la observación
+  year = año
+  sex = sexo (grupo)
+  age = agrupación etarea
+  suicides_no = numero de suicidios en ese grupo
+  population = población
+  suicides/100k pop = ratio de suicidios
+  country-year = pais-año
+  HDI for year = human development index x año
+  gdp_for_year ($) = gdp anual
+  gdp_per_capita ($) = gdp per capita
+  generation = generación basada en la agrupación etarea
+
+2) Revisar integridad y estructura de dataset.
+**comentarios**
+Primera revisión sólo muestra NAs en el HDI por año para 19456 observaciones.
+
+
+```{r}
+library(dplyr)
+
+str(master_suic)
+
+summary(master_suic)
+
+hist(master_suic$`suicides/100k pop`)
+
+master_suic %>% group_by(country) %>% summarize(ratio_suic_percap = sum(suicides_no)*100000/sum(population)) %>% arrange(desc(ratio_suic_percap))
+```
+
+
+
+3) 
