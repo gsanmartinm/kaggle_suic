@@ -7,7 +7,7 @@ output: html_document
 ```{r cars}
 library(readr)
 master_suic <- read_csv("master.csv")
-View(master)
+View(master_suic)
 ```
 
 La data presentada tiene 27820 observaciones en 12 columnas.
@@ -29,20 +29,90 @@ El significado de cada columna:
 2) Revisar integridad y estructura de dataset.
 **comentarios**
 Primera revisión sólo muestra NAs en el HDI por año para 19456 observaciones.
-
-
 ```{r}
-library(dplyr)
+dim(master_suic)
 
 str(master_suic)
 
 summary(master_suic)
 
-hist(master_suic$`suicides/100k pop`)
 
-master_suic %>% group_by(country) %>% summarize(ratio_suic_percap = sum(suicides_no)*100000/sum(population)) %>% arrange(desc(ratio_suic_percap))
 ```
 
+
+Para comenzar el análisis, revisaremos en orden decreciente el ratio de suicidios por 100 mil hab para todos los continentes, luego paises, y luego años.
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(hrbrthemes)
+
+str(master_suic)
+
+summary(master_suic)
+
+
+#se agregó el sgte ejemplo para ver como eliminar los espacios de country usando la libreria stringr, esto nos permite mejorar la efectividad del inner_join cuando hay algunos espacios que nos joden la vida.
+#library(stringr)
+#copy_master <- master_suic
+#copy_master$country_ne <- str_replace(copy_master$country," ","")
+#copy_master %>% group_by(country_ne) %>% count(country,wt=population,sort=TRUE)
+
+dim(master_suic)
+master_suic <- master_suic[,1:13]
+
+```
+
+```{r}
+# ratio suicidios por continente
+a_continent <- master_suic %>% group_by(continent) %>% summarize(ratio_suic_percap = sum(suicides_no)*100000/sum(population)) %>% arrange(desc(ratio_suic_percap))
+
+# ratio suicidios por año
+a_year <- master_suic %>% group_by(year) %>% summarize(ratio_suic_percap = sum(suicides_no)*100000/sum(population)) %>% arrange(desc(ratio_suic_percap))
+
+# ratio suicidios por pais
+a_country <- master_suic %>% group_by(country) %>% summarize(ratio_suic_percap = sum(suicides_no)*100000/sum(population)) %>% arrange(desc(ratio_suic_percap))
+
+#gráfica de barras, suicidios por continente
+a_continent %>% ggplot(aes(x = continent, y = ratio_suic_percap, fill=continent))+
+  geom_bar(stat="identity")+
+  coord_flip()+
+  scale_fill_brewer(palette = "Set1") +
+  theme(legend.position="none")+
+  theme_modern_rc()+
+  scale_y_continuous(breaks = c(0,3,6,9,12,15,18))
+  
+
+#gráfico de linea, ratio suicidios por año (todo el mundo)
+a_year %>% ggplot(aes(x = year, y = ratio_suic_percap))+
+  geom_line(stat="identity")+
+  theme_modern_rc()+
+  scale_x_continuous(breaks = c(1985,1990,1995,2000,2005,2010,2015))
+
+#un gráfico de distribución para ver todos los países, y luego un gráfico de barras para identificar aquellos que son top10 en suicidios
+
+a_country %>% ggplot(aes(x = ratio_suic_percap))+
+  geom_density(alpha=0.6)+
+  scale_fill_viridis_c()+
+  scale_color_viridis_c()+
+  theme_modern_rc()
+
+a_country %>% top_n(9,ratio_suic_percap) %>% arrange(desc(ratio_suic_percap)) %>% ggplot(aes(x = country, y = ratio_suic_percap, fill=country))+
+  geom_bar(stat="identity")+
+  coord_flip()+
+  scale_fill_brewer(palette = "Set1") +
+  theme(legend.position="none")+
+  theme_modern_rc()+
+  scale_y_continuous(breaks = c(0,5,10,15,20,25,30,35,40))+
+  ggtitle("top 9 ratio suicidios cada 100 mil habitantes")
+
+
+# gráficas potenciales:
+# boxplot x país x año (dinámico?)
+# analizar ratio de suicidios según grupo etareo
+# revisar distribuciones de ratios suicidios vs sexo
+
+```
 
 
 3) 
