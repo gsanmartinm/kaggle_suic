@@ -139,6 +139,22 @@ Al revisar los datos globales según sexo, se observa que **hombres tienen tasas
 
 ###Cómo afecta el HDI a la tasa de suicidios?###
 
+Al revisar la información disponible a nivel de continentes (todos los datos disponibles), se observa una correlación positiva entre ambas variables, es decir, el human development index se correlaciona con la tasa de suicidios.
+
+```{r}
+master_suic %>% group_by(continent) %>% summarize(prom_HDI=mean(`HDI for year`,na.rm=TRUE),ratio_suic_100k = sum(suicides_no)*100000/sum(population))%>% ggplot(aes(x=prom_HDI,y=ratio_suic_100k,color=continent))+
+  geom_point()+
+  geom_smooth(method=lm , color="red", se=TRUE)
+```
+
+Si lo vemos a nivel de país:
+
+```{r}
+master_suic %>% group_by(country,sex) %>% filter(continent=="Europe") %>%  summarize(prom_HDI=mean(`HDI for year`,na.rm=TRUE),ratio_suic_100k = sum(suicides_no)*100000/sum(population))%>% ggplot(aes(x=prom_HDI,y=ratio_suic_100k,color=sex))+
+  geom_point()+
+  geom_smooth(method=lm , color="red", se=TRUE)
+```
+
 
 
 
