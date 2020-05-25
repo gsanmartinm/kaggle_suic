@@ -46,6 +46,7 @@ Para comenzar el análisis, revisaremos en orden decreciente el ratio de suicidi
 library(dplyr)
 library(ggplot2)
 library(hrbrthemes)
+library(gganimate)
 
 str(master_suic)
 
@@ -106,13 +107,38 @@ a_country %>% top_n(9,ratio_suic_percap) %>% arrange(desc(ratio_suic_percap)) %>
   scale_y_continuous(breaks = c(0,5,10,15,20,25,30,35,40))+
   ggtitle("top 9 ratio suicidios cada 100 mil habitantes")
 
+#distribuciones ratio_suic_percap por hombres/mujeres
+#todos, todos los años
+master_suic %>% ggplot(aes(x=`suicides/100k pop`,group=sex,fill=sex))+
+  geom_density()+
+  theme_ipsum()+
+  scale_x_log10()
+
+#distribuciones ratio_suic_percap por grupo etareo
+#todos, todos los años
+master_suic %>% ggplot(aes(x=age,y=`suicides/100k pop`,group=age,fill=age))+
+  geom_boxplot()+
+  theme_ipsum()+
+  scale_y_log10()+
+  transition_states(year,transition_length = 1,state_length = 2)+
+  ggtitle('Año {closest_state}',subtitle = 'Frame {frame} of {nframes}')
 
 # gráficas potenciales:
 # boxplot x país x año (dinámico?)
 # analizar ratio de suicidios según grupo etareo
 # revisar distribuciones de ratios suicidios vs sexo
 
+
 ```
 
+Tasas de suicidios son mas altas en Europa y Asia, mientras las mas bajas se encuentran en **Sud América** y **África**.
+La evolución general de la tasa de suicidios muestra un *peak* en 1995 con una tasa promedio mundo de 15 suicidios x 100 mil habs.
+Al revisar los top9 paises con mayores tasas de suicidio (promedio 1985 a 2016), se observa Lithuania con **40 suicidios x 100 mil habs**. Los 8 países restantes (mayoritariamente Europeos), se mueven en tasas de **25-35**.
+Respecto al efecto del grupo etareo sobre la tasa de suicidios, **a nivel general** se observa una correlación positiva entre edad y tasa de suicidios.
+Al revisar los datos globales según sexo, se observa que **hombres tienen tasas de suicidios mayores que mujeres**.
 
-3) 
+###Cómo afecta el HDI a la tasa de suicidios?###
+
+
+
+
